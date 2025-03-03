@@ -4,6 +4,7 @@
 ##       "code": "# create_vectordb.py\n\nimport os\nfrom dotenv import load_dotenv\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.schema import Document\nfrom sample_data import documents\n\n# Load environment variables\nload_dotenv()\n\n# Initialize the OpenAI embeddings\nembeddings = OpenAIEmbeddings()\n\n# Convert the sample texts to Document objects\ndocs = [Document(page_content=text, metadata={\"source\": f\"doc_{i}\"}) for i, text in enumerate(documents)]\n\n# Create and save the vector store locally\nvector_store = FAISS.from_documents(docs, embeddings)\nvector_store.save_local(\"faiss_index\")\n\nprint(\"Vector database created and saved successfully!\")"
 
 import os
+from env.secrets_manager import SecretsManager
 from langchain import hub
 from dotenv import load_dotenv
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -22,8 +23,13 @@ os.environ['LANGSMITH_PROJECT'] = "Python RAG undervisning"
 os.environ['LANGCHAIN_API_KEY']
 os.environ['OPENAI_API_KEY']
 
-# load env 
+
+# Load environment variables (for non-secret config)
 load_dotenv()
+
+# Get API keys from 1Password
+openai_api_key = SecretsManager.get_secret("OpenAI_API_Key", "credential", "API_Keys")
+langchain_api_key = SecretsManager.get_secret("Langchain_API_Key", "credential", "API_Keys")
 
 # init embeddings
 embeddings = OpenAIEmbeddings(
@@ -37,7 +43,6 @@ vector_store = FAISS.from_documents(
    embedding_func=embeddings,
    persist_dir="./faiss_langchain_db" # local storage
 )
-
 
 retriever = vector_store.retriever
 
