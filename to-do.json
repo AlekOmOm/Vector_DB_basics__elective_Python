@@ -1,0 +1,63 @@
+{
+  "exercise_name": "vector_db_basics",
+  "tasks": [
+    {
+      "step": 1,
+      "title": "Setup Project Environment",
+      "completed": true
+    },
+    {
+      "step": 2,
+      "title": "Create Sample Data",
+      "completed": true
+    },
+    {
+      "step": 3,
+      "title": "Create Vector Database",
+      "completed": false 
+    },
+    {
+      "step": 4,
+      "title": "Query the Vector Database",
+      "completed":  false
+    },
+    {
+      "step": 5,
+      "title": "Create a Simple API",
+      "completed": false 
+    },
+    {
+      "step": 6,
+      "title": "Test with Postman",
+      "completed": false
+    },
+    {
+      "step": 7,
+      "title": "Experiment and Learn",
+      "completed": false
+    }
+  ],
+  "extensions": [
+    {
+      "title": "Add metadata filtering to queries",
+      "completed": false
+    },
+    {
+      "title": "Implement a simple web interface",
+      "completed": false
+    },
+    {
+      "title": "Try different embedding models",
+      "completed": false
+    },
+    {
+      "title": "Experiment with different vector stores",
+      "completed": false
+    },
+    {
+      "title": "Implement a RAG system",
+      "completed": false
+    }
+  ],
+  "last_updated": "2025-03-03"
+}

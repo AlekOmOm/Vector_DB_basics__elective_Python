@@ -1,0 +1,109 @@
+
+  "info": {
+    "name": "Vector DB API",
+    "description": "Collection for testing the Vector Database API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Query Vector DB",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"How do vector databases work?\",\n    \"k\": 3\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/query",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["query"]
+        },
+        "description": "Query the vector database for similar documents"
+      },
+      "response": []
+    },
+    {
+      "name": "Query Vector DB - Cosine Similarity",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"What is cosine similarity?\",\n    \"k\": 2\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/query",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["query"]
+        },
+        "description": "Query about cosine similarity"
+      },
+      "response": []
+    },
+    {
+      "name": "Query Vector DB - Use Cases",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"What can I use vector databases for?\",\n    \"k\": 3\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/query",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["query"]
+        },
+        "description": "Query about vector database use cases"
+      },
+      "response": []
+    },
+    {
+      "name": "Query Vector DB - Traditional vs Vector DBs",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"query\": \"What is the difference between vector databases and traditional databases?\",\n    \"k\": 2\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/query",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["query"]
+        },
+        "description": "Query about the differences between vector and traditional databases"
+      },
+      "response": []
+    }
+  ]
+}
