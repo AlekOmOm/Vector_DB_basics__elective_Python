@@ -1,0 +1,128 @@
+{
+  "exercise_name": "vector_db_basics",
+  "description": "A minimalist introduction to vector databases using LangChain, OpenAI embeddings, and Postman",
+  "prerequisites": [
+    "Python 3.8+ installed",
+    "Postman installed",
+    "OpenAI API key",
+    "Basic Python knowledge"
+  ],
+  "tools": [
+    {
+      "name": "LangChain",
+      "version": "latest",
+      "purpose": "Framework for working with language models and vector stores"
+    },
+    {
+      "name": "FAISS",
+      "version": "latest",
+      "purpose": "Lightweight vector store that runs locally"
+    },
+    {
+      "name": "OpenAI Embeddings",
+      "purpose": "Converting text to vector embeddings"
+    },
+    {
+      "name": "Postman",
+      "purpose": "Testing retrieval API"
+    }
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "title": "Setup Project Environment",
+      "instructions": [
+        "Create a new directory for your project",
+        "Set up a virtual environment: `python -m venv venv`",
+        "Activate the virtual environment",
+        "Install required packages: `pip install langchain openai faiss-cpu python-dotenv flask`"
+      ],
+      "code": "# Create a .env file in your project root\nOPENAI_API_KEY=your_openai_api_key_here"
+    },
+    {
+      "step": 2,
+      "title": "Create Sample Data",
+      "instructions": [
+        "Create a file named 'sample_data.py' with basic information to vectorize"
+      ],
+      "code": "# sample_data.py\n\ndocuments = [\n    \"Vector databases store data as high-dimensional vectors, which are mathematical representations of features.\",\n    \"Embeddings are numerical representations of text that capture semantic meaning.\",\n    \"FAISS is a lightweight vector database that can run entirely in memory.\",\n    \"Vector similarity search finds the most similar vectors to a query vector using distance metrics.\",\n    \"Cosine similarity measures the cosine of the angle between two vectors and is commonly used in vector databases.\",\n    \"LangChain provides abstractions for working with various vector databases including FAISS, Pinecone, and Chroma.\",\n    \"Vector databases are particularly useful for semantic search and recommendation systems.\",\n    \"Unlike traditional databases, vector databases are optimized for similarity search rather than exact matching.\"\n]"
+    },
+    {
+      "step": 3,
+      "title": "Create Vector Database",
+      "instructions": [
+        "Create a file named 'create_vectordb.py' to convert sample data to vectors and save them"
+      ],
+      "code": "# create_vectordb.py\n\nimport os\nfrom dotenv import load_dotenv\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\nfrom langchain.schema import Document\nfrom sample_data import documents\n\n# Load environment variables\nload_dotenv()\n\n# Initialize the OpenAI embeddings\nembeddings = OpenAIEmbeddings()\n\n# Convert the sample texts to Document objects\ndocs = [Document(page_content=text, metadata={\"source\": f\"doc_{i}\"}) for i, text in enumerate(documents)]\n\n# Create and save the vector store locally\nvector_store = FAISS.from_documents(docs, embeddings)\nvector_store.save_local(\"faiss_index\")\n\nprint(\"Vector database created and saved successfully!\")"
+    },
+    {
+      "step": 4,
+      "title": "Query the Vector Database",
+      "instructions": [
+        "Create a file named 'query_vectordb.py' to test querying the database directly"
+      ],
+      "code": "# query_vectordb.py\n\nimport os\nfrom dotenv import load_dotenv\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\n\n# Load environment variables\nload_dotenv()\n\n# Initialize the OpenAI embeddings\nembeddings = OpenAIEmbeddings()\n\n# Load the vector store\nvector_store = FAISS.load_local(\"faiss_index\", embeddings)\n\n# Function to query the vector store\ndef query_vector_db(query_text, k=2):\n    # Search for similar documents\n    docs = vector_store.similarity_search(query_text, k=k)\n    \n    print(f\"\\nQuery: {query_text}\")\n    print(\"\\nResults:\")\n    for i, doc in enumerate(docs):\n        print(f\"\\n{i+1}. {doc.page_content}\")\n        print(f\"   Source: {doc.metadata['source']}\")\n\n# Test with some queries\nquery_vector_db(\"How do vector databases work?\")\nquery_vector_db(\"What is cosine similarity?\")\nquery_vector_db(\"What can I use vector databases for?\")"
+    },
+    {
+      "step": 5,
+      "title": "Create a Simple API",
+      "instructions": [
+        "Create a file named 'api.py' to expose the vector database through a REST API"
+      ],
+      "code": "# api.py\n\nfrom flask import Flask, request, jsonify\nimport os\nfrom dotenv import load_dotenv\nfrom langchain.embeddings.openai import OpenAIEmbeddings\nfrom langchain.vectorstores import FAISS\n\n# Load environment variables\nload_dotenv()\n\napp = Flask(__name__)\n\n# Initialize the OpenAI embeddings\nembeddings = OpenAIEmbeddings()\n\n# Load the vector store\nvector_store = FAISS.load_local(\"faiss_index\", embeddings)\n\n@app.route('/query', methods=['POST'])\ndef query():\n    data = request.json\n    if not data or 'query' not in data:\n        return jsonify({'error': 'No query provided'}), 400\n    \n    query_text = data['query']\n    k = data.get('k', 2)  # Number of results to return, default is 2\n    \n    # Search for similar documents\n    docs = vector_store.similarity_search(query_text, k=k)\n    \n    # Format the results\n    results = []\n    for i, doc in enumerate(docs):\n        results.append({\n            'content': doc.page_content,\n            'source': doc.metadata['source']\n        })\n    \n    return jsonify({\n        'query': query_text,\n        'results': results\n    })\n\nif __name__ == '__main__':\n    app.run(debug=True)"
+    },
+    {
+      "step": 6,
+      "title": "Test with Postman",
+      "instructions": [
+        "Run the API server with `python api.py`",
+        "Open Postman and create a new request",
+        "Set the request method to POST",
+        "Set the URL to http://localhost:5000/query",
+        "Set the Content-Type header to application/json",
+        "Add a request body in JSON format",
+        "Send the request and examine the response"
+      ],
+      "postman_setup": {
+        "method": "POST",
+        "url": "http://localhost:5000/query",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "raw": "{\n    \"query\": \"How do vector databases work?\",\n    \"k\": 3\n}"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "title": "Experiment and Learn",
+      "instructions": [
+        "Try different queries through Postman",
+        "Add more documents to sample_data.py and regenerate the vector database",
+        "Experiment with different values of k",
+        "Try modifying the API to add filtering capabilities"
+      ],
+      "example_queries": [
+        "What is the difference between vector databases and traditional databases?",
+        "How are embeddings created?",
+        "What is FAISS used for?",
+        "How can I measure similarity between vectors?"
+      ]
+    }
+  ],
+  "learning_objectives": [
+    "Understand the basic concept of vector databases",
+    "Learn how to convert text to vector embeddings",
+    "Create and query a simple vector database using FAISS",
+    "Build a basic API for vector similarity search",
+    "Test vector database queries using Postman"
+  ],
+  "extensions": [
+    "Add metadata filtering to your queries",
+    "Implement a simple web interface instead of Postman",
+    "Try different embedding models (e.g., sentence-transformers)",
+    "Experiment with different vector stores (Chroma, Pinecone)",
+    "Implement a RAG (Retrieval-Augmented Generation) system"
+  ]
+}
