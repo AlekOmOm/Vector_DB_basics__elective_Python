@@ -1,5 +1,8 @@
 import subprocess
 
+# module to get secrets from 1Password
+## setup module by: 
+
 
 class SecretsManager:
 

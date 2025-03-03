@@ -5,8 +5,8 @@ import os
 from langchain import hub
 from dotenv import load_dotenv
 
-from langchain.vectorstores import FAISS
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
@@ -16,24 +16,18 @@ from vector_db.create_vectordb import VectorDB
 
 #### RETRIEVAL and GENERATION ####
 
-# prompt 
-prompt = hub.pull("rlm/rag-prompt")
+class Query_DB:
+   def __init__(self):
+      self.vector_db = VectorDB()
+      self.vector_db.create_vector_db()
+      self.retriever = self.vector_db.get_vector_db_retriever()
 
-
-# LLM 
-llm = ChatOpenAI(
-   model_name="gpt-3.5-turbo",
-   temperature=0.0
-)
-
-# Chain
-rag_chain = (
-   {"context": VectorDB.get_vector_db_retriever, "question": RunnablePassthrough()}
-   | prompt
-   | llm
-   | StrOutputParser()
-)
-
-# Question
-rag_chain.invoke("What is the steps for creating a simple CLI LangChain chat app?")
-
+   def query_vector_db(self, query_text, k=2):
+      # Search for similar documents
+      docs = self.retriever.similarity_search(query_text, k=k)
+      
+      print(f"\nQuery: {query_text}")
+      print("\nResults:")
+      for i, doc in enumerate(docs):
+         print(f"\n{i+1}. {doc.page_content}")
+         print(f"   Source: {doc.metadata['source']}")
