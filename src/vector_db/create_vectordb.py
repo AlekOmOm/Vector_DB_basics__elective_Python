@@ -16,57 +16,53 @@ from langchain.schema import Document
 from data import sample_data # sample_data.py at location: ~/data/sample_data.py
 
 
-os.environ['LANGCHAIN_TRACING_V2'] = 'true'
-os.environ['LANGCHAIN_ENDPOINT'] = 'https://api.smith.langchain.com'
-os.environ['LANGSMITH_PROJECT'] = "Python RAG undervisning"
-
-os.environ['LANGCHAIN_API_KEY']
-os.environ['OPENAI_API_KEY']
 
 
-# Load environment variables (for non-secret config)
-load_dotenv()
 
-# Get API keys from 1Password
-openai_api_key = SecretsManager.get_secret("OpenAI_API_Key", "credential", "API_Keys")
-langchain_api_key = SecretsManager.get_secret("Langchain_API_Key", "credential", "API_Keys")
+class VectorDB:
+   def __init__(self):
+        self.vector_store = None
+        self.retriever = None
 
-# init embeddings
-embeddings = OpenAIEmbeddings(
-   api_key=os.getenv("OPENAI_API_KEY"),
-   model="gpt-3.5-turbo"
-)
+   def create_vector_db(self):
+      self.load_environment_variables()
+      self.init_embeddings()
+      self.init_docs()
+      
+      # Create and save the vector store locally
+      self.vector_store = FAISS.from_documents(self.docs, self.embeddings)
+      self.vector_store.save_local("./faiss_index_db") # save the vector store locally
 
-# init vector_store
-vector_store = FAISS.from_documents(
-   docs=sample_data.documents,
-   embedding_func=embeddings,
-   persist_dir="./faiss_langchain_db" # local storage
-)
+      self.retriever = self.vector_store.retriever
 
-retriever = vector_store.retriever
+      print("Vector database created and saved successfully!")
 
-#### RETRIEVAL and GENERATION ####
+   def load_environment_variables(self):
+      os.environ['LANGCHAIN_API_KEY'] = SecretsManager.get_secret("Langchain_API_Key", "credential", "API_Keys")
+      os.environ['OPENAI_API_KEY'] = SecretsManager.get_secret("OpenAI_API_Key", "credential", "API_Keys")
+      os.environ['LANGCHAIN_TRACING_V2'] = 'true'
+      os.environ['LANGCHAIN_ENDPOINT'] = 'https://api.smith.langchain.com'
+      os.environ['LANGSMITH_PROJECT'] = "Python RAG undervisning"
 
-# prompt 
-prompt = hub.pull("rlm/rag-prompt")
+      load_dotenv()
 
+   def init_embeddings(self):
+      # Initialize the OpenAI embeddings
+      self.embeddings = OpenAIEmbeddings(
+         api_key=SecretsManager.get_secret("OpenAI_API_Key", "credential", "API_Keys"),
+         model="gpt-3.5-turbo"
+      )
+   
+   def init_docs(self):
+      self.docs = [Document(page_content=text, metadata={"source": f"doc_{i}"}) for i, text in enumerate(sample_data.documents)]
+   
+   def get_vector_db_retriever(self):
+      self.create_vector_db()
+      return self.retriever
+   
 
-# LLM 
-llm = ChatOpenAI(
-   model_name="gpt-3.5-turbo",
-   temperature=0.0
-)
-
-# Chain
-rag_chain = (
-   {"context": retriever, "question": RunnablePassthrough()}
-   | prompt
-   | llm
-   | StrOutputParser()
-)
-
-# Question
-rag_chain.invoke("What is the steps for creating a simple CLI LangChain chat app?")
-
-
+if __name__ == "__main__":
+   vectordb = VectorDB()
+   vectordb.create_vector_db()
+   retriever = vectordb.get_vector_db_retriever()
+   print(retriever)
