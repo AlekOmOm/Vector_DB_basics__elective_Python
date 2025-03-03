@@ -3,11 +3,6 @@ import subprocess
 
 class SecretsManager:
 
-   # exporting function 
-   
-
-
-
    # Function to get secrets from 1Password
    def get_secret(item_name, field_name, vault="API_Keys"):
       try:
